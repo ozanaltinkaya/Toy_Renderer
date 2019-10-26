@@ -1,8 +1,6 @@
 from OpenGL.GL import *
 from Buffers import *
 from Shader import *
-from Texture import *
-from GUI import Grid
 
 class Renderer:
     def __init__(self):

@@ -1,10 +1,7 @@
-import numpy
-import Buffers
-from Datatypes import *
+from glm import *
 from collections import namedtuple
 from typing import List, Set, Dict, Tuple, Optional
 from PIL import Image
-from OpenGL.GL import *
 from Buffers import *
 from Shader import *
 import Global

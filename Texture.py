@@ -1,7 +1,5 @@
 from PIL import Image
 from OpenGL.GL import *
-import numpy
-from ctypes import *
 
 
 class Texture:

@@ -3,10 +3,10 @@ from Renderer import *
 import glm
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
-from ctypes import *
 import GUI
 import Settings
-from Model import ObjLoader
+import Global
+from GLTFLoader import *
 
 
 def mouse_button_callback(window, button, action, mods):
@@ -28,6 +28,9 @@ def framebuffer_size_callback(window, width, height):
 def scroll_callback(window, xoffset, yoffset):
     pass
 
+def drop_callback(window, paths):
+    print(paths[0])
+
 
 def main():
     width, height = Settings.WindowWidth, Settings.WindowHeight
@@ -40,6 +43,7 @@ def main():
     glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.window_hint(glfw.SAMPLES, 4)
+    glfw.window_hint(glfw.DEPTH_BITS, 32)
 
     window = glfw.create_window(width, height, "OpenGL Window", None, None)
 
@@ -49,8 +53,10 @@ def main():
 
     glfw.make_context_current(window)
     glfw.set_framebuffer_size_callback(window, framebuffer_size_callback)
+    # glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
     # imgui stuff
+    imgui.create_context()
     impl = GlfwRenderer(window)
 
     # Check OpenGL version
@@ -58,51 +64,30 @@ def main():
 
     glfw.swap_interval(0)
 
-    positions = [-50.0, -50.0, 0.0, 0.0,  # 0
-                 50.0, -50.0, 1.0, 0.0,  # 1
-                 50.0, 50.0, 1.0, 1.0,  # 2
-                 -50.0, 50.0, 0.0, 1.0  # 3
-                 ]
-    indices = [0, 1, 2,
-               2, 3, 0]
+    load = GLTFLoader("res/gltf/trailer/scene.gltf")
+    # load = GLTFLoader("res/gltf/OrientationTest/glTF/OrientationTest.gltf")
+    # load = GLTFLoader("res/gltf/Sponza/glTF/Sponza.gltf")
+    # load = GLTFLoader("res/gltf/AntiqueCamera/glTF/AntiqueCamera.gltf")
 
-    obj = ObjLoader('res/meshes/hello.obj')
+    scene = load.get_scene()
+
+
+
 
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_MULTISAMPLE)
 
-    va = VertexArray()
-    vb = VertexBuffer(obj.vertices, 4 * 3 * int(len(obj.vertices) / 3))
+    Global.ProjMat = glm.perspective(glm.radians(35), width / height, 1.0, 100000.0)
 
-    layout = VertexBufferLayout()
-    layout.push_float(3)
-    # layout.push_float(2)
-    va.add_buffer(vb, layout)
-
-    ib = IndexBuffer(obj.faces, len(obj.faces))
-    proj = glm.perspective(glm.radians(35), width / height, 0.1, 100000.0)
-
-    sdr = Shader('res/shaders/BasicMVP.glsl')
-    sdr.bind()
-
-    # sdr.set_uniform4f('u_Color', 0.8, 0.3, 0.8, 1.0)
-
-    texture = Texture('res/textures/google512.png')
-    texture.bind()
-    sdr.set_uniform1i('u_Texture', 0)
+    scene.setup_scene()
 
     grid = GUI.Grid(10, 50)
 
-    va.unbind()
-    sdr.unbind()
-    vb.unbind()
-    ib.unbind()
-
     renderer = Renderer()
 
-    translation = glm.vec3(0.0, 100.0, 0.0)
+    translation = glm.vec3(0.0, 0.0, 0.0)
 
     grid = GUI.Grid(10, 50)
     rotation = 0.0
@@ -116,11 +101,13 @@ def main():
     # Time & FPS counter
     tt = GUI.TimeTracker()
 
+
     # Input poll
     inpt = GUI.Input()
 
     # glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
     glfw.set_mouse_button_callback(window, mouse_button_callback)
+    glfw.set_drop_callback(window, drop_callback)
 
     while not glfw.window_should_close(window):
         # Time & FPS counter
@@ -137,48 +124,23 @@ def main():
         renderer.clear()
         glClear(GL_DEPTH_BUFFER_BIT)
 
-        # Imgui
+        # --------Imgui----------
         impl.process_inputs()
         imgui.new_frame()
-
-        imgui.begin("Test")
-        imgui.text("Model")
-        changed, translation.x = imgui.drag_float("X", translation.x)
-        changed, translation.y = imgui.drag_float("Y", translation.y)
-        changed, translation.z = imgui.drag_float("Z", translation.z)
-
-        imgui.text("Camera")
-        changed, cam.position.x = imgui.drag_float("X cam", cam.position.x)
-        changed, cam.position.y = imgui.drag_float("Y cam", cam.position.y)
-        changed, cam.position.z = imgui.drag_float("Z cam", cam.position.z)
-        imgui.text("FPS: " + "%.2f" % (tt.fps()) + "     " + "%.2f" % (tt.frame_time()) + "ms")
-
-        imgui.text("Changed: %s, Value: %s" % (changed, translation.x))
-        imgui.end()
+        GUI.draw_imgui()
 
         # Camera Stuff
-        view = cam.get_view()
+        Global.ViewMat = cam.get_view()
 
-        grid.draw_grid(proj, view)
+        grid.draw_grid(Global.ProjMat, Global.ViewMat)
 
-        model = glm.translate(glm.mat4(1.0), translation)
-        rotation = rotation + tt.deltatime * 20
-        model = glm.rotate(model, glm.radians(rotation), glm.vec3(0.0, -1.0, 0.0))
-
-        mvp = proj * view * model
-
-        sdr.bind()
-        sdr.set_uniformMat4f('u_MVP', mvp)
-
-        renderer.draw(va, ib, sdr)
-        sdr.unbind()
+        scene.draw_scene()
 
         imgui.render()
         impl.render(imgui.get_draw_data())
         glfw.swap_buffers(window)
 
     impl.shutdown()
-    imgui.shutdown()
     glfw.terminate()
 
 

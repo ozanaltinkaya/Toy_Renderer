@@ -1,6 +1,5 @@
 from pygltflib import GLTF2
 from os import path
-from pygltflib import utils
 from struct import *
 from Scene import *
 import itertools
