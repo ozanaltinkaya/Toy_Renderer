@@ -12,8 +12,11 @@ from GLTFLoader import *
 def mouse_button_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.PRESS:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+        Global.CamRotationEnabled = True
+
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.RELEASE:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
+        Global.CamRotationEnabled = False
 
 
 def process_input(window):
@@ -70,6 +73,7 @@ def main():
     # load = GLTFLoader("res/gltf/Sponza/glTF/Sponza.gltf")
     # load = GLTFLoader("res/gltf/AntiqueCamera/glTF/AntiqueCamera.gltf")
     # load = GLTFLoader("res/gltf/Triangle/glTF/Triangle.gltf")
+    # load = GLTFLoader("res/gltf/2CylinderEngine/glTF/2CylinderEngine.gltf")
 
     scene = load.get_scene()
 
@@ -131,7 +135,9 @@ def main():
         # --------Imgui----------
         impl.process_inputs()
         imgui.new_frame()
-        GUI.draw_imgui()
+        GUI.draw_imgui(scene)
+
+        imgui.show_demo_window()
 
         # Camera Stuff
         Global.ViewMat = cam.get_view()

@@ -11,6 +11,8 @@ class Shader:
         self.source = self.parse_shader(self.filepath)
         self.m_RendererID = self.create_shader(self.source.vertex, self.source.fragment)
         self.location = None
+        self.uniforms = []
+
 
     def delete_shader(self):
         glDeleteProgram(self.m_RendererID)

@@ -5,6 +5,7 @@ GuiEnabled = True
 GridEnabled = True
 StatsEnabled = True
 
+
 # Controls
 MouseSensitivity = 0.1
 CameraSpeed = 600

@@ -7,11 +7,32 @@ import glfw
 import Settings
 import Global
 import imgui
+from Scene import *
+import itertools
 
-def draw_node_tree(nodes):
-    pass
 
-def draw_imgui():
+def draw_node_item(node, scene):
+    nd = node
+
+    if imgui.tree_node("Node: {} {}".format(str(nd.id), nd.name), imgui.TREE_NODE_OPEN_ON_ARROW):
+        if nd.mesh:
+            if imgui.tree_node("Mesh: {}".format(str(nd.mesh.id)), imgui.TREE_NODE_OPEN_ON_ARROW):
+                if nd.mesh.primitives:
+                    for i, prim in enumerate(nd.mesh.primitives):
+                        if imgui.tree_node("Primitive: {}".format(str(i))):
+                            if imgui.tree_node("Material", flags=imgui.TREE_NODE_LEAF | imgui.TREE_NODE_SELECTED):
+                                imgui.tree_pop()
+                            imgui.tree_pop()
+                imgui.tree_pop()
+
+        if nd.children:
+            for i in nd.children:
+                draw_node_item(scene.nodelist[i], scene)
+        imgui.tree_pop()
+        if imgui.is_item_clicked(): print("clicked")
+
+
+def draw_imgui(scene: Scene):
     if Settings.GuiEnabled:
         # Menu Bar
         if imgui.begin_main_menu_bar():
@@ -44,13 +65,12 @@ def draw_imgui():
 
         # Scene
         imgui.begin("Scene")
-        for i in range(10):
-            if imgui.tree_node("Scene: " + str(i)):
-                imgui.tree_pop()
+        draw_node_item(scene.nodelist[0], scene)
         imgui.end()
 
         imgui.begin("Properties")
         imgui.text("Model")
+
         # changed, translation.x = imgui.drag_float("X", translation.x)
         # changed, translation.y = imgui.drag_float("Y", translation.y)
         # changed, translation.z = imgui.drag_float("Z", translation.z)
@@ -60,12 +80,10 @@ def draw_imgui():
         # changed, cam.position.y = imgui.drag_float("Y cam", cam.position.y)
         # changed, cam.position.z = imgui.drag_float("Z cam", cam.position.z)
 
-
         imgui.end()
 
     else:
         pass
-
 
 
 def draw_line(self, va: VertexArray, shader: Shader, point_count):
@@ -92,14 +110,14 @@ class TimeTracker:
             self.rendertime = self.deltatime
             self.timepassed = 0
         Global.deltatime = self.deltatime
-        Global.fps = 1000/(self.rendertime*1000)
-        Global.frametime = self.deltatime*1000
+        Global.fps = 1000 / (self.rendertime * 1000)
+        Global.frametime = self.deltatime * 1000
 
     def fps(self):
-        return 1000/(self.rendertime*1000)
+        return 1000 / (self.rendertime * 1000)
 
     def frame_time(self):
-        return self.deltatime*1000
+        return self.deltatime * 1000
 
 
 class Grid:
@@ -118,7 +136,7 @@ class Grid:
         self.VA.unbind()
         self.grid_sdr.unbind()
 
-        distance = cell_size*step
+        distance = cell_size * step
         grid_array = []
         if step == 0:
             xline = [cell_size, 0.0, -cell_size, 0.0]
@@ -132,7 +150,7 @@ class Grid:
 
         if step > 0:
             for i in range(step):
-                i = i+1
+                i = i + 1
                 grid_array.extend([distance, i * cell_size,
                                    -distance, i * cell_size])
                 grid_array.extend([distance, -i * cell_size,
@@ -155,7 +173,7 @@ class Grid:
     def get_point_count(self):
         # if self.step == 0:
         #     return 4
-        return 4 + (self.step*8)
+        return 4 + (self.step * 8)
 
     def unbind_shader(self):
         self.grid_sdr.bind()
@@ -169,7 +187,7 @@ class Grid:
             self.grid_sdr.bind()
             self.VA.bind()
             self.grid_sdr.set_uniformMat4f('u_MVP',
-                                      proj * view * rotate(mat4(1.0), radians(90), vec3(1.0, 0.0, 0.0)))
+                                           proj * view * rotate(mat4(1.0), radians(90), vec3(1.0, 0.0, 0.0)))
             # print(self.get_point_count())
 
             glDrawArrays(GL_LINES, 0, self.get_point_count())
@@ -180,21 +198,22 @@ class Grid:
 
 class Input:
     def __init__(self):
-        self.xpos = Settings.WindowWidth/2
-        self.ypos = Settings.WindowHeight/2
+        self.xpos = Settings.WindowWidth / 2
+        self.ypos = Settings.WindowHeight / 2
         self.lastX = 0.0
         self.lastY = 0.0
         self.xoffset = 0.0
         self.yoffset = 0.0
         self.firstmouse = True
 
-    def mouse_pos_callback(self, window,xpos,ypos):
+    def mouse_pos_callback(self, window, xpos, ypos):
         self.xpos = xpos
         self.ypos = ypos
         if self.firstmouse:
             self.lastX = xpos
             self.lastY = ypos
             self.firstmouse = False
+
         self.xoffset = xpos - self.lastX
         self.yoffset = self.lastY - ypos
 
@@ -216,7 +235,8 @@ class Input:
             self.lastX = xpos
             self.lastY = ypos
             self.firstmouse = False
-        self.xoffset = xpos - self.lastX
+        # self.xoffset = xpos - self.lastX
+        self.xoffset = self.lastX - xpos
         self.yoffset = self.lastY - ypos
 
         self.lastX = xpos
@@ -235,12 +255,10 @@ class Flycam:
         self.view = mat4(1.0)
         self.cam_X_rotation = 0.0
         self.cam_Y_rotation = 0.0
-        self.cam_rotation_enabled = True
 
     def update(self, window):
 
         if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
-
             self.position -= glm.vec3(1.0, 0.0, 0.0) * Settings.CameraSpeed * Global.deltatime * glm.inverse(
                 self.orientation)
 
@@ -262,14 +280,21 @@ class Flycam:
         if glfw.get_key(window, glfw.KEY_LEFT_ALT) == glfw.PRESS:
             self.position.y = self.position.y - Settings.CameraSpeed * Global.deltatime
 
+        if Global.XOffset > 30.0 or Global.XOffset < -30.0:
+            Global.XOffset = 0.0
+
+        if Global.YOffset > 30.0 or Global.YOffset < -30.0:
+            Global.YOffset = 0.0
+
         self.cam_X_rotation += Global.XOffset * Settings.MouseSensitivity
         self.cam_Y_rotation += Global.YOffset * Settings.MouseSensitivity
 
-        qxrot = glm.angleAxis(glm.radians(-self.cam_X_rotation), glm.vec3(0.0, 1.0, 0.0))
+        qxrot = glm.angleAxis(glm.radians(self.cam_X_rotation), glm.vec3(0.0, 1.0, 0.0))
         qyrot = glm.angleAxis(glm.radians(self.cam_Y_rotation), glm.vec3(1.0, 0.0, 0.0))
 
-        if self.cam_rotation_enabled:
-            self.orientation = qxrot * qyrot
+        print(Global.XOffset)
+
+        self.orientation = qxrot * qyrot
 
         cam_rot_mat = glm.mat4_cast(self.orientation)
 

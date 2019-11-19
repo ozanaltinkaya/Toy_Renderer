@@ -37,6 +37,7 @@ class Node:
     def __init__(self):
         self.mesh = None
         self.name = ""
+        self.id = 0
         self.parent = None
         self.children: List[int] = []
         self.transformation = mat4(1.0)
@@ -80,6 +81,7 @@ class Mesh:
     def __init__(self):
         self.name = ''
         self.primitives = []
+        self.id = 0
 
     def setup_mesh(self):
         for prim in self.primitives:

@@ -169,6 +169,7 @@ class GLTFLoader:
         for ind, nd in enumerate(self.gltf.nodes):
             mynode = Node()
             mynode.transformation = self.get_node_transformation(ind)
+            mynode.id = ind
             if nd.name is not None:
                 mynode.name = nd.name
 
@@ -191,6 +192,7 @@ class GLTFLoader:
         if self.gltf.meshes is not None:
             for mesh_ind, msh in enumerate(self.gltf.meshes):
                 mymesh = Mesh()
+                mymesh.id = mesh_ind
                 if msh.name:
                     mymesh.name = msh.name
                 if msh.primitives is not None:
@@ -204,7 +206,7 @@ class GLTFLoader:
                             myprim.material = self.scene.material_list[prim.material]
                         else:
                             print("Primitive has no material. Assigning default material.")
-                            myprim.material = self.scene.defaultMaterial  # TODO
+                            myprim.material = self.scene.material_list[0]
                         mymesh.primitives.append(myprim)
                 meshes.append(mymesh)
 
@@ -212,7 +214,7 @@ class GLTFLoader:
 
     def create_material_list(self):
         materials = []
-        if self.gltf.materials is not None:
+        if self.gltf.materials:
             for ind, mat in enumerate(self.gltf.materials):
                 mymat = PBRMaterial()
 
@@ -258,6 +260,8 @@ class GLTFLoader:
 
                 else:
                     print("Unknown material type.")
+        else:
+            materials.append(PBRMaterial())
 
         return materials
 
