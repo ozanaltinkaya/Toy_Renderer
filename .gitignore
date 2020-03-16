@@ -124,4 +124,6 @@ dmypy.json
 
 .idea/
 res/
+test.py
+test2.py
 

@@ -69,12 +69,7 @@ def main():
 
     glfw.swap_interval(0)
 
-    load = GLTFLoader("res/gltf/trailer/scene.gltf")
-    # load = GLTFLoader("res/gltf/OrientationTest/glTF/OrientationTest.gltf")
-    # load = GLTFLoader("res/gltf/Sponza/glTF/Sponza.gltf")
-    # load = GLTFLoader("res/gltf/AntiqueCamera/glTF/AntiqueCamera.gltf")
-    # load = GLTFLoader("res/gltf/Triangle/glTF/Triangle.gltf")
-    # load = GLTFLoader("res/gltf/2CylinderEngine/glTF/2CylinderEngine.gltf")
+    load = GLTFLoader("resources/gltf/trailer/scene.gltf")
 
     scene = load.get_scene()
 

@@ -179,7 +179,6 @@ class GLTFLoader:
             if nd.children is not None:
                 mynode.children = nd.children
 
-            # print(mynode)
             nodes.append(mynode)
         # Set parents
         for i in range(len(nodes)):
@@ -202,7 +201,6 @@ class GLTFLoader:
                         myprim.vertices = self.compose_vertex_buffer(mesh_ind, pr_ind)
                         myprim.indices = self.get_accesor_data(prim.indices)
                         if prim.material is not None:
-                            # myprim.material = prim.material
                             myprim.material = self.scene.material_list[prim.material]
                         else:
                             print("Primitive has no material. Assigning default material.")

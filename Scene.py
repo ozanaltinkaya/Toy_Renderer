@@ -114,7 +114,7 @@ class Primitive:
         self.layout.push_float(3)
         self.va.add_buffer(self.vbo, self.layout)
         self.ib = IndexBuffer(self.indices)
-        self.shader = Shader('res/shaders/BasicTextureMVP.glsl')
+        self.shader = Shader('resources/shaders/BasicTextureMVP.glsl')
 
         self.material.textures.basecolor.setup_texture()
 
@@ -175,15 +175,15 @@ class Texture:
         # Create default texture
         if color:
             if color == "white":
-                self.load_texture("res/textures/white.png")
+                self.load_texture("resources/textures/white.png")
                 self.name = "DefaultWhite"
 
             if color == "black":
-                self.load_texture("res/textures/black.png")
+                self.load_texture("resources/textures/black.png")
                 self.name = "DefaultBlack"
 
             if color == "normal":
-                self.load_texture("res/textures/normal.png")
+                self.load_texture("resources/textures/normal.png")
                 self.name = "DefaultNormal"
 
 

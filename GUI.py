@@ -71,15 +71,6 @@ def draw_imgui(scene: Scene):
         imgui.begin("Properties")
         imgui.text("Model")
 
-        # changed, translation.x = imgui.drag_float("X", translation.x)
-        # changed, translation.y = imgui.drag_float("Y", translation.y)
-        # changed, translation.z = imgui.drag_float("Z", translation.z)
-        #
-        # imgui.text("Camera")
-        # changed, cam.position.x = imgui.drag_float("X cam", cam.position.x)
-        # changed, cam.position.y = imgui.drag_float("Y cam", cam.position.y)
-        # changed, cam.position.z = imgui.drag_float("Z cam", cam.position.z)
-
         imgui.end()
 
     else:
@@ -126,7 +117,7 @@ class Grid:
         self.cell_size = cell_size
         self.grid = []
 
-        self.grid_sdr = Shader('res/shaders/Grid.glsl')
+        self.grid_sdr = Shader('resources/shaders/Grid.glsl')
         self.grid_sdr.bind()
 
         self.layout = VertexBufferLayout()
@@ -188,10 +179,8 @@ class Grid:
             self.VA.bind()
             self.grid_sdr.set_uniformMat4f('u_MVP',
                                            proj * view * rotate(mat4(1.0), radians(90), vec3(1.0, 0.0, 0.0)))
-            # print(self.get_point_count())
 
             glDrawArrays(GL_LINES, 0, self.get_point_count())
-            # draw_line(VALin, self.grid_sdr, self.get_point_count())
             self.grid_sdr.unbind()
             self.VA.unbind()
 
