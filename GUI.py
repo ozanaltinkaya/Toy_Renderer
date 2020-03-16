@@ -235,7 +235,7 @@ class Input:
             self.lastX = xpos
             self.lastY = ypos
             self.firstmouse = False
-        # self.xoffset = xpos - self.lastX
+        self.xoffset = xpos - self.lastX
         self.xoffset = self.lastX - xpos
         self.yoffset = self.lastY - ypos
 
@@ -280,11 +280,11 @@ class Flycam:
         if glfw.get_key(window, glfw.KEY_LEFT_ALT) == glfw.PRESS:
             self.position.y = self.position.y - Settings.CameraSpeed * Global.deltatime
 
-        if Global.XOffset > 30.0 or Global.XOffset < -30.0:
-            Global.XOffset = 0.0
-
-        if Global.YOffset > 30.0 or Global.YOffset < -30.0:
-            Global.YOffset = 0.0
+        # if Global.XOffset > 30.0 or Global.XOffset < -30.0:
+        #     Global.XOffset = 0.0
+        #
+        # if Global.YOffset > 30.0 or Global.YOffset < -30.0:
+        #     Global.YOffset = 0.0
 
         self.cam_X_rotation += Global.XOffset * Settings.MouseSensitivity
         self.cam_Y_rotation += Global.YOffset * Settings.MouseSensitivity

@@ -12,6 +12,7 @@ from GLTFLoader import *
 def mouse_button_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.PRESS:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+        glfw.set_input_mode(window, glfw.RAW_MOUSE_MOTION, glfw.TRUE)
         Global.CamRotationEnabled = True
 
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.RELEASE:

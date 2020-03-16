@@ -12,8 +12,12 @@ from GLTFLoader import *
 def mouse_button_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.PRESS:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+        glfw.set_input_mode(window, glfw.RAW_MOUSE_MOTION, glfw.TRUE)
+        Global.CamRotationEnabled = True
+
     if button == glfw.MOUSE_BUTTON_RIGHT and action == glfw.RELEASE:
         glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_NORMAL)
+        Global.CamRotationEnabled = False
 
 
 def process_input(window):
@@ -27,6 +31,7 @@ def framebuffer_size_callback(window, width, height):
 
 def scroll_callback(window, xoffset, yoffset):
     pass
+
 
 def drop_callback(window, paths):
     print(paths[0])
@@ -68,11 +73,10 @@ def main():
     # load = GLTFLoader("res/gltf/OrientationTest/glTF/OrientationTest.gltf")
     # load = GLTFLoader("res/gltf/Sponza/glTF/Sponza.gltf")
     # load = GLTFLoader("res/gltf/AntiqueCamera/glTF/AntiqueCamera.gltf")
+    # load = GLTFLoader("res/gltf/Triangle/glTF/Triangle.gltf")
+    # load = GLTFLoader("res/gltf/2CylinderEngine/glTF/2CylinderEngine.gltf")
 
     scene = load.get_scene()
-
-
-
 
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_BLEND)
@@ -101,13 +105,18 @@ def main():
     # Time & FPS counter
     tt = GUI.TimeTracker()
 
-
     # Input poll
     inpt = GUI.Input()
 
     # glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
     glfw.set_mouse_button_callback(window, mouse_button_callback)
     glfw.set_drop_callback(window, drop_callback)
+
+    scene.nodelist[0].transformation = glm.rotate(scene.nodelist[0].transformation, glm.radians(90),
+                                                  vec3(1.0, 0.0, 0.0))
+
+    scene.nodelist[0].transformation = glm.rotate(scene.nodelist[0].transformation, glm.radians(180),
+                                                  vec3(0.0, 1.0, 0.0))
 
     while not glfw.window_should_close(window):
         # Time & FPS counter
@@ -127,7 +136,9 @@ def main():
         # --------Imgui----------
         impl.process_inputs()
         imgui.new_frame()
-        GUI.draw_imgui()
+        GUI.draw_imgui(scene)
+
+        imgui.show_demo_window()
 
         # Camera Stuff
         Global.ViewMat = cam.get_view()
