@@ -1,7 +1,7 @@
 astroid==2.0.4
 Click==7.0
 colorama==0.4.0
-future==0.16.0
+future==1.0.0
 glfw==1.7.0
 glm==0.1.0
 imgui==0.1.0
